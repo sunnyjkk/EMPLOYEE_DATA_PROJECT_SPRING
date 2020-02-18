@@ -3,7 +3,10 @@
  */
 package com.employee.dao;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
@@ -13,12 +16,16 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import com.employee.entity.Employee;
 
 /**
  * @author Adebayo Adesanya
  *
  */
+@Sql(scripts= {"classpath:/db/create-table.sql"})
 @ContextConfiguration("classpath:data-context.xml")
 @RunWith(SpringRunner.class)
 public class EmployeeDaoImplTest {
@@ -52,6 +59,8 @@ public class EmployeeDaoImplTest {
 		
 		try {
 			dbCon = DriverManager.getConnection(jdbcUrl, user, password);
+			
+			assertThat(dbCon).isNotNull();
 		}
 		catch(SQLException sqle) {
 			sqle.printStackTrace();
@@ -61,5 +70,24 @@ public class EmployeeDaoImplTest {
 			dbCon.close();
 		}
 	}
-
+	@Test
+	public void saveEmployeeToDBTest() {
+		Employee newEmployee = new Employee();
+		newEmployee.setFirstName("Mary");
+		newEmployee.setLastName("Black");
+		newEmployee.setEmail("Mary.black@gmail.com");
+		newEmployee.setPhoneNumber("08063407895");
+		Date employeeDate = Date.valueOf("2000-07-24");
+		newEmployee.setDateOfBirth(employeeDate);
+		
+		assertThat(employeeDaoImpl).isNotNull();
+		
+		employeeDaoImpl.saveEmployee(newEmployee);
+		
+		int id = newEmployee.getEmployeeId();
+		Employee existingEmployee = employeeDaoImpl.getById(id);
+		assertThat(existingEmployee).isNotNull();
+		
+		
+	}
 }
